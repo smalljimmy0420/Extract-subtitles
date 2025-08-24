@@ -42,6 +42,11 @@ pip install -r requirements.txt
 python subtitle_gui.py
 ```
 
+### 3.打包成exe
+```bash
+pyinstaller --onefile --noconsole subtitle_gui.py
+```
+
 ### 3. 使用步骤
 1. 点击"启动Edge调试模式"
 2. 在打开的Edge中登录B站账号
