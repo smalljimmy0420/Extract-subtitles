@@ -69,7 +69,7 @@ A: 检查Edge是否安装，尝试以管理员身份运行
 
 如果这个工具对您有帮助，欢迎打赏支持！
 
-![Alt text](image-2.png)
+![Alt text](image-2.jpg)
 
 
 
