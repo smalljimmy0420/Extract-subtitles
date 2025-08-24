@@ -14,6 +14,10 @@
 - Python 3.7+
 - Microsoft Edge 浏览器
 - FFmpeg（可选，用于语音识别）
+- https://ffmpeg.org/download.html
+- ![Alt text](image.png)
+- ![Alt text](image-1.png)
+- 解压完成直接放入D盘，不要改名，程序已经将路径写死
 
 ### Python依赖包
 
@@ -65,7 +69,7 @@ A: 检查Edge是否安装，尝试以管理员身份运行
 
 如果这个工具对您有帮助，欢迎打赏支持！
 
-<!-- 这里留空白区域放置打赏二维码或支付宝微信收款码 -->
+![Alt text](image-2.png)
 
 
 
