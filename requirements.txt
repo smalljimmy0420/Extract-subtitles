@@ -1,0 +1,6 @@
+requests>=2.25.0
+urllib3>=1.26.0
+openai-whisper>=20231117
+yt-dlp>=2023.7.6
+numpy<2.0
+selenium>=4.0.0
