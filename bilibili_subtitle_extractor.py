@@ -4,9 +4,8 @@
 B站视频字幕提取工具 - 增强版
 作者: wjm
 版本: v2.0.0
-创建时间: 2024
-联系方式: [您的联系方式]
-项目地址: [您的项目地址]
+创建时间: 2025
+
 
 功能特色:
 - 支持AI小助手字幕自动获取
@@ -26,7 +25,7 @@ B站视频字幕提取工具 - 增强版
 作者 wjm 不承担因使用本工具而产生的任何法律责任。
 
 版权声明:
-Copyright (c) 2024 wjm. All rights reserved.
+Copyright (c) 2025 wjm. All rights reserved.
 本软件遵循个人使用许可协议。
 """
 
@@ -47,7 +46,7 @@ __version__ = "2.0.0"
 __author__ = "wjm"
 __email__ = "[您的邮箱地址]"
 __license__ = "Personal Use Only - 仅供个人使用"
-__copyright__ = "Copyright (c) 2024 wjm"
+__copyright__ = "Copyright (c) 2025 wjm"
 __description__ = "B站视频字幕提取工具 - 支持AI小助手和语音识别"
 __url__ = "[您的项目URL]"
 __status__ = "Production"
@@ -79,7 +78,7 @@ class BilibiliSubtitleExtractor:
         banner = f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║                    B站视频字幕提取工具                        ║
-║                      by wjm - 2024                          ║
+║                      by wjm - 2025                          ║
 ║                                                              ║
 ║  版本: {__version__:<10} 作者: {__author__:<10}                        ║
 ║  状态: {__status__:<10} 许可: 个人使用                      ║
@@ -87,7 +86,7 @@ class BilibiliSubtitleExtractor:
 ║  {__license__:<58} ║
 ║  本工具由 wjm 开发，不得用于商业用途，仅供个人学习研究使用      ║
 ║                                                              ║
-║  Copyright (c) 2024 wjm. All rights reserved.               ║
+║  Copyright (c) 2025 wjm. All rights reserved.               ║
 ╚══════════════════════════════════════════════════════════════╝
         """
         print(banner)
