@@ -5,7 +5,8 @@ B站视频字幕提取工具 - 增强版
 作者: wjm
 版本: v2.0.0
 创建时间: 2025
-
+联系方式: [您的联系方式]
+项目地址: [您的项目地址]
 
 功能特色:
 - 支持AI小助手字幕自动获取
@@ -25,7 +26,7 @@ B站视频字幕提取工具 - 增强版
 作者 wjm 不承担因使用本工具而产生的任何法律责任。
 
 版权声明:
-Copyright (c) 2025 wjm. All rights reserved.
+Copyright (c) 2024 wjm. All rights reserved.
 本软件遵循个人使用许可协议。
 """
 
@@ -46,7 +47,7 @@ __version__ = "2.0.0"
 __author__ = "wjm"
 __email__ = "[您的邮箱地址]"
 __license__ = "Personal Use Only - 仅供个人使用"
-__copyright__ = "Copyright (c) 2025 wjm"
+__copyright__ = "Copyright (c) 2024 wjm"
 __description__ = "B站视频字幕提取工具 - 支持AI小助手和语音识别"
 __url__ = "[您的项目URL]"
 __status__ = "Production"
@@ -78,7 +79,7 @@ class BilibiliSubtitleExtractor:
         banner = f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║                    B站视频字幕提取工具                        ║
-║                      by wjm - 2025                          ║
+║                      by wjm - 2024                          ║
 ║                                                              ║
 ║  版本: {__version__:<10} 作者: {__author__:<10}                        ║
 ║  状态: {__status__:<10} 许可: 个人使用                      ║
@@ -86,7 +87,7 @@ class BilibiliSubtitleExtractor:
 ║  {__license__:<58} ║
 ║  本工具由 wjm 开发，不得用于商业用途，仅供个人学习研究使用      ║
 ║                                                              ║
-║  Copyright (c) 2025 wjm. All rights reserved.               ║
+║  Copyright (c) 2024 wjm. All rights reserved.               ║
 ╚══════════════════════════════════════════════════════════════╝
         """
         print(banner)
@@ -195,18 +196,50 @@ class BilibiliSubtitleExtractor:
                     print("❌ AI小助手按钮点击失败")
                     return None
                 
-                # 步骤3已经在步骤2中完成（面板检测成功），直接进入步骤4
-                print("\n✅ 步骤3: AI面板已检测到，跳过等待")
+                # 第三步：等待AI面板完全加载并稳定
+                print("\n⏳ 步骤3: 等待AI面板完全加载")
+                print("💡 AI面板需要时间渲染，请耐心等待...")
+                time.sleep(5)  # 给AI面板更多时间完全渲染
                 
-                # 第四步：确保在字幕列表标签页
-                print("\n📋 步骤4: 切换到字幕列表标签页")
-                success = self.ensure_subtitle_tab_active(driver)
-                if not success:
-                    print("❌ 无法切换到字幕列表标签页")
-                    return None
+                # 第四步：检查当前所在的标签页
+                print("\n🔍 步骤4: 检查当前所在的标签页")
+                print("💡 这是关键步骤！必须确认在字幕列表页才能提取字幕")
                 
-                # 第五步：滚动获取所有字幕内容
-                print("\n📜 步骤5: 获取字幕内容（智能滚动）")
+                is_on_subtitle_tab = self.check_if_on_subtitle_tab(driver)
+                
+                print(f"\n📊 检测结果: is_on_subtitle_tab = {is_on_subtitle_tab}")
+                
+                if is_on_subtitle_tab:
+                    print("✅ 已经在字幕列表标签页，可以直接提取字幕")
+                else:
+                    print("❌ 当前不在字幕列表页，可能在'视频总结'页或其他页面")
+                    print("🔴 这就是为什么会提取到错误数据的原因！")
+                    
+                    # 第五步：切换到字幕列表标签页
+                    print("\n🔄 步骤5: 切换到字幕列表标签页")
+                    print("💡 正在尝试点击'字幕列表'标签...")
+                    
+                    success = self.ensure_subtitle_tab_active(driver)
+                    if not success:
+                        print("❌ 无法切换到字幕列表标签页")
+                        print("💡 可能的原因：")
+                        print("   - 此视频不支持字幕功能")
+                        print("   - AI面板结构发生了变化")
+                        print("   - 页面加载不完整")
+                        return None
+                    
+                    # 验证切换结果
+                    time.sleep(3)  # 等待标签页切换完成
+                    is_on_subtitle_tab = self.check_if_on_subtitle_tab(driver)
+                    if not is_on_subtitle_tab:
+                        print("❌ 切换到字幕列表标签页失败")
+                        return None
+                    else:
+                        print("✅ 成功切换到字幕列表标签页")
+                
+                # 最后步骤：滚动获取所有字幕内容
+                print("\n📜 最后步骤: 获取字幕内容（智能滚动）")
+                print("💡 即将开始提取字幕数据，请稍等...")
                 subtitles = self.extract_subtitles_with_smart_scroll(driver)
                 
                 if subtitles and len(subtitles) > 0:
@@ -1295,16 +1328,17 @@ class BilibiliSubtitleExtractor:
                     for wait_attempt in range(12):
                         time.sleep(0.5)  # 等待0.5秒
                         
-                        # 检查是否成功
-                        success = self.verify_ai_panel_appeared(driver, before_panels)
-                        if success:
-                            print(f"✅ {strategy['name']}成功! (等待{(wait_attempt + 1) * 0.5:.1f}秒后检测到面板)")
+                        # 只检查AI面板是否出现，不检查是否在字幕列表页
+                        ai_panel_exists = self.check_if_ai_panel_exists(driver)
+                        if ai_panel_exists:
+                            print(f"✅ {strategy['name']}成功! AI面板已出现 (等待{(wait_attempt + 1) * 0.5:.1f}秒后检测到)")
+                            print("💡 注意：AI面板可能默认在'视频总结'页，后续需要切换到'字幕列表'页")
                             return True
                         
                         if wait_attempt < 11:  # 不是最后一次
                             print(f"   ⏳ 继续等待... ({(wait_attempt + 1) * 0.5:.1f}/6.0秒)")
                     
-                    print(f"❌ {strategy['name']}失败 - 等待6秒后仍未检测到面板")
+                    print(f"❌ {strategy['name']}失败 - 等待6秒后仍未检测到AI面板")
                         
                 except Exception as e:
                     print(f"❌ {strategy['name']}出错: {str(e)}")
@@ -1322,70 +1356,167 @@ class BilibiliSubtitleExtractor:
             print(f"❌ 点击AI按钮失败: {str(e)}")
             return False
     
-    def verify_ai_panel_appeared(self, driver, before_count):
-        """验证AI面板是否出现 - 超简化版"""
+    def check_if_ai_panel_exists(self, driver):
+        """检查AI面板是否存在（不要求在字幕列表页）"""
+        try:
+            from selenium.webdriver.common.by import By
+            
+            # 简单检查AI面板是否存在
+            ai_panel_indicators = [
+                "视频总结",  # 左侧标签
+                "字幕列表",  # 右侧标签  
+                "AI小助手",  # 面板标题
+            ]
+            
+            found_count = 0
+            for indicator in ai_panel_indicators:
+                try:
+                    elements = driver.find_elements(By.XPATH, f"//*[contains(text(), '{indicator}')]")
+                    if elements and any(elem.is_displayed() for elem in elements):
+                        found_count += 1
+                except Exception as e:
+                    continue
+            
+            return found_count >= 2  # 找到2个或以上指示器认为存在
+            
+        except Exception as e:
+            return False
+
+    def verify_ai_panel_exists(self, driver):
+        """简单验证AI面板是否出现（不检查字幕列表）"""
         from selenium.webdriver.common.by import By
-        import time
         
         try:
             print("🔍 检测AI面板是否出现...")
             
-            # 最简单的检测：直接查找页面中是否出现了这些关键元素
-            success_indicators = [
+            # 检测AI面板指示器
+            ai_panel_indicators = [
                 "视频总结",  # 左侧标签
                 "字幕列表",  # 右侧标签  
                 "AI小助手",  # 面板标题
-                "00:01",    # 字幕时间戳
-                "Hello"     # 字幕内容示例
             ]
             
-            found_indicators = []
+            found_panel_indicators = []
             
-            for indicator in success_indicators:
+            for indicator in ai_panel_indicators:
                 try:
                     elements = driver.find_elements(By.XPATH, f"//*[contains(text(), '{indicator}')]")
                     if elements:
                         # 检查是否有可见元素
                         visible_count = sum(1 for elem in elements if elem.is_displayed())
                         if visible_count > 0:
-                            found_indicators.append(indicator)
-                            print(f"   ✅ 找到: '{indicator}' (共{visible_count}个可见元素)")
+                            found_panel_indicators.append(indicator)
+                            print(f"   ✅ 找到AI面板指示器: '{indicator}' (共{visible_count}个可见元素)")
                 except Exception as e:
                     continue
             
-            # 如果找到2个或以上指示器，认为面板已出现
-            if len(found_indicators) >= 2:
-                print(f"✅ AI面板检测成功! 找到 {len(found_indicators)} 个指示器: {found_indicators}")
+            # 如果找到2个或以上指示器，认为AI面板已出现
+            if len(found_panel_indicators) >= 2:
+                print(f"✅ AI面板已出现 - 找到 {len(found_panel_indicators)} 个指示器: {found_panel_indicators}")
                 return True
-            
-            # 备用检测：检查是否有新的可见元素出现在页面上
-            try:
-                visible_elements = driver.execute_script("""
-                    var count = 0;
-                    var allElements = document.querySelectorAll('*');
-                    for (var i = 0; i < allElements.length; i++) {
-                        var elem = allElements[i];
-                        var style = window.getComputedStyle(elem);
-                        if (style.display !== 'none' && style.visibility !== 'hidden' && 
-                            elem.offsetWidth > 0 && elem.offsetHeight > 0) {
-                            count++;
-                        }
-                    }
-                    return count;
-                """)
+            else:
+                print(f"❌ AI面板未出现 - 只找到 {len(found_panel_indicators)} 个指示器: {found_panel_indicators}")
+                return False
                 
-                print(f"   📊 当前页面可见元素总数: {visible_elements}")
-                
-                # 如果元素数量显著增加，可能是面板出现了
-                if visible_elements > 500:  # 假设面板会增加较多元素
-                    print("✅ 检测到页面元素显著增加，可能是AI面板出现")
-                    return True
-                    
-            except Exception as e:
-                print(f"   ❌ 元素计数失败: {str(e)}")
-            
-            print(f"❌ AI面板检测失败 - 只找到 {len(found_indicators)} 个指示器: {found_indicators}")
+        except Exception as e:
+            print(f"检查AI面板时出错: {str(e)}")
             return False
+
+    def verify_subtitle_tab_active(self, driver):
+        """验证AI面板是否出现且在字幕列表页 - 严格检测版"""
+        from selenium.webdriver.common.by import By
+        import time
+        
+        try:
+            print("🔍 检测AI面板是否出现且在字幕列表页...")
+            
+            # 第一步：检测AI面板是否出现
+            ai_panel_indicators = [
+                "视频总结",  # 左侧标签
+                "字幕列表",  # 右侧标签  
+                "AI小助手",  # 面板标题
+            ]
+            
+            found_panel_indicators = []
+            
+            for indicator in ai_panel_indicators:
+                try:
+                    elements = driver.find_elements(By.XPATH, f"//*[contains(text(), '{indicator}')]")
+                    if elements:
+                        # 检查是否有可见元素
+                        visible_count = sum(1 for elem in elements if elem.is_displayed())
+                        if visible_count > 0:
+                            found_panel_indicators.append(indicator)
+                            print(f"   ✅ 找到AI面板指示器: '{indicator}' (共{visible_count}个可见元素)")
+                except Exception as e:
+                    continue
+            
+            # 如果AI面板没有出现，直接返回失败
+            if len(found_panel_indicators) < 2:
+                print(f"❌ AI面板未完全出现 - 只找到 {len(found_panel_indicators)} 个指示器: {found_panel_indicators}")
+                return False
+                
+            print(f"✅ AI面板已出现 - 找到 {len(found_panel_indicators)} 个指示器: {found_panel_indicators}")
+            
+            # 第二步：检测是否在字幕列表页（关键！）
+            print("🔍 检测是否在字幕列表页面...")
+            
+            # 更严格的字幕列表检测
+            subtitle_indicators = [
+                "00:01",    # 字幕时间戳
+                "00:02",    # 字幕时间戳
+                "00:03",    # 字幕时间戳
+                "00:00",    # 字幕时间戳
+            ]
+            
+            found_subtitle_indicators = []
+            
+            for indicator in subtitle_indicators:
+                try:
+                    elements = driver.find_elements(By.XPATH, f"//*[contains(text(), '{indicator}')]")
+                    if elements:
+                        # 检查是否有可见元素，且在右侧区域（AI面板内）
+                        window_width = driver.get_window_size()['width']
+                        for elem in elements:
+                            if elem.is_displayed():
+                                location = elem.location
+                                if location['x'] > window_width * 0.4:  # 在右侧
+                                    found_subtitle_indicators.append(indicator)
+                                    print(f"   ✅ 在右侧找到字幕时间戳: '{indicator}'")
+                                    break
+                except Exception as e:
+                    continue
+            
+            # 检查字幕列表标签是否激活
+            subtitle_tab_active = False
+            try:
+                subtitle_tab_elements = driver.find_elements(By.XPATH, "//div[contains(text(), '字幕列表') or contains(text(), '字幕')] | //span[contains(text(), '字幕列表') or contains(text(), '字幕')]")
+                for elem in subtitle_tab_elements:
+                    if elem.is_displayed():
+                        class_name = elem.get_attribute('class') or ''
+                        if ('active' in class_name.lower() or 'Active' in class_name or 'selected' in class_name.lower()):
+                            subtitle_tab_active = True
+                            print(f"   ✅ 字幕列表标签处于激活状态")
+                            break
+            except Exception as e:
+                pass
+            
+            # 最终判断：需要同时满足以下条件
+            # 1. AI面板已出现
+            # 2. 能看到字幕时间戳 OR 字幕标签激活
+            has_subtitle_content = len(found_subtitle_indicators) > 0
+            
+            if has_subtitle_content or subtitle_tab_active:
+                print(f"✅ 成功！AI面板已出现且在字幕列表页")
+                print(f"   - 字幕时间戳: {found_subtitle_indicators}")
+                print(f"   - 字幕标签激活: {subtitle_tab_active}")
+                return True
+            else:
+                print(f"❌ AI面板已出现但不在字幕列表页")
+                print(f"   - 找到字幕时间戳: {found_subtitle_indicators}")
+                print(f"   - 字幕标签激活: {subtitle_tab_active}")
+                print(f"   💡 可能当前在'视频总结'页，需要点击'字幕列表'标签")
+                return False
             
         except Exception as e:
             print(f"检查面板时出错: {str(e)}")
@@ -1473,6 +1604,139 @@ class BilibiliSubtitleExtractor:
         except Exception:
             return False
     
+    def check_if_on_subtitle_tab(self, driver):
+        """检查当前是否在字幕列表标签页 - 严格检测版"""
+        try:
+            from selenium.webdriver.common.by import By
+            import re
+            
+            print("🔍 严格检查当前所在标签页...")
+            
+            # 方法1: 检查字幕列表标签是否激活（最重要）
+            print("   🔍 检查字幕列表标签激活状态...")
+            
+            # 查找字幕列表标签
+            subtitle_tab_selectors = [
+                "//div[text()='字幕列表']",
+                "//span[text()='字幕列表']",
+                "//div[contains(text(), '字幕列表')]",
+                "//span[contains(text(), '字幕列表')]"
+            ]
+            
+            subtitle_tab_active = False
+            for selector in subtitle_tab_selectors:
+                try:
+                    elements = driver.find_elements(By.XPATH, selector)
+                    for elem in elements:
+                        if elem.is_displayed():
+                            # 检查元素的激活状态
+                            class_name = elem.get_attribute('class') or ''
+                            parent_class = elem.find_element(By.XPATH, '..'). get_attribute('class') or '' if elem.find_element(By.XPATH, '..') else ''
+                            
+                            # 检查是否有激活标记
+                            is_active = (
+                                'active' in class_name.lower() or 
+                                'Active' in class_name or
+                                'selected' in class_name.lower() or
+                                '_Active_' in class_name or
+                                'active' in parent_class.lower() or
+                                'Active' in parent_class or
+                                '_Active_' in parent_class
+                            )
+                            
+                            if is_active:
+                                print(f"   ✅ 找到激活的字幕列表标签: class='{class_name}'")
+                                subtitle_tab_active = True
+                                break
+                            else:
+                                print(f"   ⚪ 找到字幕列表标签但未激活: class='{class_name}'")
+                    
+                    if subtitle_tab_active:
+                        break
+                except Exception as e:
+                    continue
+            
+            # 如果字幕列表标签激活，进一步检查字幕内容
+            if subtitle_tab_active:
+                print("   🔍 字幕列表标签已激活，进一步检查字幕内容...")
+                
+                # 检查是否可以看到字幕时间戳在右侧AI面板区域
+                window_width = driver.get_window_size()['width']
+                right_side_threshold = window_width * 0.5  # 右侧区域
+                
+                subtitle_timestamps_found = 0
+                time_patterns = ['00:00', '00:01', '00:02', '00:03', '00:04', '00:05']
+                
+                for pattern in time_patterns:
+                    try:
+                        elements = driver.find_elements(By.XPATH, f"//*[contains(text(), '{pattern}')]")
+                        for elem in elements:
+                            if elem.is_displayed():
+                                location = elem.location
+                                # 只计算右侧区域的时间戳
+                                if location['x'] > right_side_threshold:
+                                    subtitle_timestamps_found += 1
+                                    print(f"   ✅ 在右侧区域找到字幕时间戳: '{pattern}'")
+                                    break
+                    except Exception as e:
+                        continue
+                
+                # 只有在激活标签且看到足够字幕时间戳时才认为在字幕页
+                if subtitle_timestamps_found >= 2:
+                    print(f"   ✅ 确认在字幕列表页：激活标签 + {subtitle_timestamps_found}个时间戳")
+                    return True
+                else:
+                    print(f"   ❌ 字幕列表标签已激活但未看到足够字幕内容（只有{subtitle_timestamps_found}个时间戳）")
+                    return False
+            
+            # 方法2: 检查是否在视频总结页（反向检查）
+            print("   🔍 检查是否在视频总结页...")
+            
+            summary_tab_selectors = [
+                "//div[text()='视频总结']",
+                "//span[text()='视频总结']",
+                "//div[contains(text(), '视频总结')]",
+                "//span[contains(text(), '视频总结')]"
+            ]
+            
+            summary_tab_active = False
+            for selector in summary_tab_selectors:
+                try:
+                    elements = driver.find_elements(By.XPATH, selector)
+                    for elem in elements:
+                        if elem.is_displayed():
+                            class_name = elem.get_attribute('class') or ''
+                            parent_class = elem.find_element(By.XPATH, '..'). get_attribute('class') or '' if elem.find_element(By.XPATH, '..') else ''
+                            
+                            is_active = (
+                                'active' in class_name.lower() or 
+                                'Active' in class_name or
+                                '_Active_' in class_name or
+                                'active' in parent_class.lower() or
+                                'Active' in parent_class or
+                                '_Active_' in parent_class
+                            )
+                            
+                            if is_active:
+                                print(f"   ❌ 找到激活的视频总结标签，当前在视频总结页")
+                                summary_tab_active = True
+                                break
+                    
+                    if summary_tab_active:
+                        break
+                except Exception as e:
+                    continue
+            
+            if summary_tab_active:
+                return False  # 明确在视频总结页
+            
+            print("   ❌ 未确认在字幕列表页，需要手动切换")
+            return False
+            
+        except Exception as e:
+            print(f"检查标签页时出错: {str(e)}")
+            return False
+
     def ensure_subtitle_tab_active(self, driver, timeout=10):
         """确保字幕列表标签页处于激活状态"""
         try:
